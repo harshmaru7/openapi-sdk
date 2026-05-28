@@ -10,6 +10,10 @@ description: >-
   this will be an array of `region` objects, each of which will contain the
   standard region attributes.
 
+  Note: results are paginated. Use the `per_page` and `page` query
+  parameters to control the slice you receive — see `meta.total` in the
+  response for the full count.
+
 tags:
   - Regions
 
