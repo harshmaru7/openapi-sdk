@@ -1,0 +1,35 @@
+name: dispatch sdk regen
+
+# Lives in harshmaru7/openapi-sdk (fork of digitalocean/openapi).
+# When a PR merges to main (= push event), fan out to each SDK repo via
+# repository_dispatch so they regenerate in parallel.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "spec SHA to dispatch (defaults to current main)"
+        required: false
+        type: string
+
+jobs:
+  fanout:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo: [godo-next, pydo-next, dots-next]
+    steps:
+      - name: dispatch ${{ matrix.repo }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.SDK_BOT_PAT }}
+          repository: harshmaru7/${{ matrix.repo }}
+          event-type: spec-updated
+          client-payload: |
+            {
+              "sha": "${{ inputs.sha || github.sha }}",
+              "actor": "${{ github.actor }}",
+              "source_run": "${{ github.run_id }}"
+            }
